@@ -14,25 +14,35 @@
 , gnome3
 }:
 
+let
+  isCross = stdenv.buildPlatform != stdenv.targetPlatform;
+in
 stdenv.mkDerivation rec {
   pname = "json-glib";
   version = "1.6.2";
 
-  outputs = [ "out" "dev" "devdoc" ];
+  outputs = [ "out" "dev" ] ++ lib.optionals (!isCross) [ "devdoc" ];
 
   src = fetchurl {
     url = "mirror://gnome/sources/${pname}/${lib.versions.majorMinor version}/${pname}-${version}.tar.xz";
     sha256 = "092g2dyy1hhl0ix9kp33wcab0pg1qicnsv0cj5ms9g9qs336cgd3";
   };
 
+  strictDeps = true;
+
+  depsBuildBuild = [
+    pkg-config
+  ] ++ lib.optionals (!isCross) [
+    gobject-introspection
+    gtk-doc
+  ];
+
   nativeBuildInputs = [
     meson
     ninja
     pkg-config
     gettext
-    gobject-introspection
     glib
-    gtk-doc
     docbook-xsl-nons
     docbook_xml_dtd_43
   ] ++ lib.optional stdenv.hostPlatform.isDarwin [
@@ -41,6 +51,12 @@ stdenv.mkDerivation rec {
 
   propagatedBuildInputs = [
     glib
+  ];
+
+  mesonFlags = lib.optionals (isCross) [
+    "-Dintrospection=disabled"
+    # doc gen uses introspection, doesn't work properly
+    "-Dgtk_doc=disabled"
   ];
 
   doCheck = true;
