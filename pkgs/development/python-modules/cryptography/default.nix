@@ -6,7 +6,7 @@
 , rustPlatform
 , cargo
 , rustc
-, setuptools-rust
+, setuptoolsRustBuildHook
 , openssl
 , Security
 , packaging
@@ -59,7 +59,7 @@ buildPythonPackage rec {
     pkg-config
   ] ++ [
     rustPlatform.cargoSetupHook
-    setuptools-rust
+    setuptoolsRustBuildHook
     cargo
     rustc
   ];
