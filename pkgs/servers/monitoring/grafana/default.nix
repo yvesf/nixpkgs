@@ -14,6 +14,7 @@
   nixosTests,
   xcbuild,
   faketty,
+  buildPackages,
 }:
 
 let
@@ -65,7 +66,7 @@ buildGoModule rec {
   };
 
   missingHashes = ./missing-hashes.json;
-  offlineCache = yarn-berry_4.fetchYarnBerryDeps {
+  offlineCache = buildPackages.yarn-berry_4.fetchYarnBerryDeps {
     inherit src missingHashes;
     hash = "sha256-Vjr/jyXqHoM/3o49IDJ2aT1s1tMkP90H+2E+yUiviF4=";
   };
@@ -86,8 +87,8 @@ buildGoModule rec {
     # required to run old node-gyp
     (python3.withPackages (ps: [ ps.distutils ]))
     faketty
-    yarn-berry_4
-    yarn-berry_4.yarnBerryConfigHook
+    buildPackages.yarn-berry_4
+    buildPackages.yarn-berry_4.yarnBerryConfigHook
   ] ++ lib.optionals stdenv.hostPlatform.isDarwin [ xcbuild.xcbuild ];
 
   # We have to remove this setupHook, otherwise it also runs in the `goModules`
@@ -95,7 +96,7 @@ buildGoModule rec {
   overrideModAttrs = (
     old: {
       nativeBuildInputs = lib.filter (
-        x: lib.getName x != (lib.getName yarn-berry_4.yarnBerryConfigHook)
+        x: lib.getName x != (lib.getName buildPackages.yarn-berry_4.yarnBerryConfigHook)
       ) old.nativeBuildInputs;
     }
   );
