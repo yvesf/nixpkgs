@@ -21,9 +21,10 @@
   re2,
   zlib,
   protobuf,
+  buildPackages,
   microsoft-gsl,
   darwinMinVersionHook,
-  pythonSupport ? true,
+  pythonSupport ? (stdenv.buildPlatform.canExecute stdenv.hostPlatform),
   cudaSupport ? config.cudaSupport,
   ncclSupport ? cudaSupport && cudaPackages.nccl.meta.available,
   rocmSupport ? config.rocmSupport,
@@ -228,7 +229,7 @@ effectiveStdenv.mkDerivation rec {
     (lib.cmakeFeature "FETCHCONTENT_SOURCE_DIR_SAFEINT" "${safeint}")
     (lib.cmakeFeature "FETCHCONTENT_TRY_FIND_PACKAGE_MODE" "ALWAYS")
     # fails to find protoc on darwin, so specify it
-    (lib.cmakeFeature "ONNX_CUSTOM_PROTOC_EXECUTABLE" (lib.getExe protobuf))
+    (lib.cmakeFeature "ONNX_CUSTOM_PROTOC_EXECUTABLE" (lib.getExe buildPackages.protobuf))
     (lib.cmakeBool "onnxruntime_BUILD_SHARED_LIB" true)
     (lib.cmakeBool "onnxruntime_BUILD_UNIT_TESTS" doCheck)
     (lib.cmakeBool "onnxruntime_USE_FULL_PROTOBUF" withFullProtobuf)
@@ -284,6 +285,8 @@ effectiveStdenv.mkDerivation rec {
     !(
       cudaSupport
       || rocmSupport
+      # cross-compiled test binaries can't execute on the build platform
+      || (effectiveStdenv.hostPlatform != effectiveStdenv.buildPlatform)
       || builtins.elem effectiveStdenv.buildPlatform.system [
         # aarch64-linux fails cpuinfo test, because /sys/devices/system/cpu/ does not exist in the sandbox
         "aarch64-linux"
