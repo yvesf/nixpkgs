@@ -107,6 +107,9 @@ stdenv.mkDerivation (finalAttrs: {
   ]
   ++ lib.optionals (!stdenv.hostPlatform.isLinux || stdenv.hostPlatform.isMusl) [
     "-Dprofiler=disabled"
+  ]
+  ++ lib.optionals (stdenv.buildPlatform != stdenv.hostPlatform) [
+    "-Dskip_gtk_tests=true"
   ];
 
   doCheck = !stdenv.hostPlatform.isDarwin;
