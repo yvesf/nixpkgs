@@ -41,9 +41,11 @@ stdenv.mkDerivation (finalAttrs: {
     validatePkgConfig
   ];
 
-  cmakeFlags = [
-    (lib.cmakeBool "BUILD_TESTING" finalAttrs.doCheck)
-  ];
+    cmakeFlags = [
+     (lib.cmakeBool "BUILD_TESTING" false)
+   ];
+   strictDeps = true;
+
   doCheck = true;
   nativeCheckInputs = [
     ruby
