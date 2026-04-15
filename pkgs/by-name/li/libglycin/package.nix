@@ -57,6 +57,8 @@ stdenv.mkDerivation (finalAttrs: {
     hash = "sha256-xd4EZ3Iv1BP59oDgZj9jXVLBTWJKZSusHr+P1ctfZks=";
   };
 
+  env.CARGO_BUILD_TARGET = stdenv.hostPlatform.rust.rustcTargetSpec;
+
   buildInputs = [
     libseccomp
     lcms2
@@ -78,6 +80,10 @@ stdenv.mkDerivation (finalAttrs: {
   ];
 
   postPatch = ''
+     substituteInPlace libglycin/meson.build --replace-fail \
+      "cargo_output = cargo_target_dir / rust_target / f'libglycin" \
+      "cargo_output = cargo_target_dir / '${stdenv.hostPlatform.rust.cargoShortTarget}' / rust_target / f'libglycin"
+
     patch -p2 < ${finalAttrs.passthru.glycin3PathsPatch}
 
     patchShebangs \
