@@ -126,6 +126,7 @@ stdenv.mkDerivation (finalAttrs: {
     desktop-file-utils
     libxslt.bin
     gobject-introspection
+    gjs
   ];
 
   buildInputs = [
