@@ -43,6 +43,8 @@ stdenv.mkDerivation rec {
     vala
   ];
 
+  buildInputs = [ gi-docgen ];
+
   propagatedBuildInputs = [
     glib
     libxml2
