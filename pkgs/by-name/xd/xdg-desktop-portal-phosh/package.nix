@@ -1,5 +1,6 @@
 {
   stdenv,
+  glib,
   lib,
   fetchFromGitLab,
   gnome-desktop,
@@ -47,6 +48,7 @@ stdenv.mkDerivation (finalAttrs: {
     pkg-config
     rustc
     desktop-file-utils
+    glib
     cargo
     rustPlatform.cargoSetupHook
     gettext
@@ -60,9 +62,21 @@ stdenv.mkDerivation (finalAttrs: {
 
   strictDeps = true;
 
+  env.CARGO_BUILD_TARGET = stdenv.hostPlatform.rust.rustcTargetSpec;
+
   prePatch = ''
     cp -r ${pfs} subprojects/pfs
     chmod +w -R subprojects/pfs # Allow patches for subprojects to work
+  '';
+
+  postPatch = ''
+    substituteInPlace src/meson.build --replace-fail \
+      "meson.project_build_root() / 'src' / cargo_target / pmp_exe_name" \
+      "meson.project_build_root() / 'src' / '${stdenv.hostPlatform.rust.cargoShortTarget}' / cargo_target / pmp_exe_name"
+
+    substituteInPlace subprojects/pfs/src/meson.build --replace-fail \
+      "meson.project_build_root() / 'src' / rust_target / 'libpfs.a'" \
+      "meson.project_build_root() / 'src' / '${stdenv.hostPlatform.rust.cargoShortTarget}' / rust_target / 'libpfs.a'"
   '';
 
   patches = [
