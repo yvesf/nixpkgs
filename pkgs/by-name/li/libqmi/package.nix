@@ -20,7 +20,7 @@
   buildPackages,
   withIntrospection ?
     lib.meta.availableOn stdenv.hostPlatform gobject-introspection
-    && stdenv.hostPlatform.emulatorAvailable buildPackages,
+    && stdenv.buildPlatform.canExecute stdenv.hostPlatform,
   withMan ? stdenv.buildPlatform.canExecute stdenv.hostPlatform,
 }:
 
